@@ -1,0 +1,50 @@
+*
+{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: "Trispace", sans-serif;
+}
+.auth
+{
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #111d2b;
+}
+.auth h2
+{
+    color: #e0efff;
+    text-align: center;
+    margin-top: -130px; 
+    margin-bottom: 40px; 
+}
+
+.auth p 
+{
+    font-size: 1.1rem;
+    color: #bed6f1;
+    width: 60vw;
+    text-align: center;
+    /* distance bet lines */
+    line-height: 1.8rem;    
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 1.5rem 3rem;
+    border-radius: 1rem;
+}
+
+.auth button 
+{
+    margin-top: 4rem;
+    font-size: 1.1rem;
+    padding: 0.7rem 0.5rem;
+    border-radius: 0.5rem;
+    letter-spacing: -1px;
+    border: none;
+    outline: none;
+    background-color:bisque;
+    cursor: pointer;
+}

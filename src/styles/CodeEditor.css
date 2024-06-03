@@ -1,0 +1,38 @@
+.code-editor
+{
+    width:50%;
+    height: 90vh; 
+}
+
+.lang-theme
+{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 50px;
+    background-color: #111d2b;
+    padding: 10px 20px;
+}
+
+.lang label,.theme label
+{
+    color: bisque;
+    font-size: small;
+}
+
+.lang select,.theme select
+{
+    color: bisque;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 7px;
+    border-radius: 5px;
+    font-size: 15px;
+    border: none;
+    outline: none;
+}
+
+.lang option,.theme option
+{
+    background-color: #111d2b;
+}

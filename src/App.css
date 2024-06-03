@@ -1,0 +1,84 @@
+.main
+{
+  height: 100vh;
+  width: 100vw;
+  background-color: #111d2b;
+  display: flex; 
+  align-items: center;
+  flex-direction: column;
+}
+
+.room
+{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin-top: 70px;
+}
+
+.room input
+{
+  padding: 10px;
+  width: 25rem;
+  font-size: 1.2rem;
+  border: none;
+  outline: none;
+  border-radius: 10px;
+  background-color: #e0efff;
+}
+.room button
+{
+  font-size: 1.1rem;
+  padding: 0.7rem 0.5rem;
+  border-radius: 10px;
+  letter-spacing: -1px;
+  border: none;
+  outline: none;
+  background-color:bisque;
+  cursor: pointer;
+}
+
+.sign-out
+{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 50px;
+  position: fixed;
+  bottom: 0;
+  background-color: #111d2b;
+}
+.sign-out button
+{
+    font-size: 1.1rem;
+    padding: 0.7rem 0.5rem;
+    border-radius: 0.5rem;
+    letter-spacing: -1px;
+    border: none;
+    outline: none;
+    background-color:burlywood;
+    cursor: pointer; 
+    width: 200px;
+}
+
+.code-chat
+{
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
