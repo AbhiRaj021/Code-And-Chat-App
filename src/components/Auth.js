@@ -1,11 +1,11 @@
+import React, { useState } from "react";
 import { auth, provider } from "../firebase-config";
 import { signInWithPopup } from "firebase/auth";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 import "../styles/Auth.css";
-
 import Cookies from "universal-cookie";
-import { useState } from "react";
+
 const cookies = new Cookies();    //cookies variable used to get,set an dremove cookies from your browser //cookies is reference to the instance of class Cookies provided by Cookies library
 
 export const Auth = (props) => {
