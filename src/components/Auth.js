@@ -21,7 +21,7 @@ export const Auth=(props)=>{
 
     return (
         <div className="auth">
-            <h2>Welcome to Code Collab App, have fun.</h2>
+            <h2>Welcome to Code and Chat App, have fun.</h2>
             <p>In this application, you can collaborate with your friends on a code playground and chat with everyone in the room.</p>
             <button onClick={signInWithGoogle}><FontAwesomeIcon icon={faGoogle}/> Sign In With Google</button>
         </div>

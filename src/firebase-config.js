@@ -7,7 +7,7 @@ import {getFirestore} from "firebase/firestore";
 // web app's Firebase configuration
 const firebaseConfig = {//This is an object that contains the configuration settings for your Firebase project.
   apiKey: "AIzaSyCXRzd5RhGW8xEBarKlG-rptqcuwZ3TbAg",
-  authDomain: "code-collab-app.firebaseapp.com",
+  authDomain: "https://code-and-chat-app.vercel.app/",
   projectId: "code-collab-app",
   storageBucket: "code-collab-app.appspot.com",
   messagingSenderId: "467667855472",
