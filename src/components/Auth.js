@@ -42,9 +42,9 @@
 //     );
 // };
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { auth, provider } from "../firebase-config";
-import { signInWithPopup } from "firebase/auth";
+import { signInWithPopup, signInWithRedirect, getRedirectResult } from "firebase/auth";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 import "../styles/Auth.css";
@@ -57,8 +57,25 @@ export const Auth = (props) => {
     const [isSigningIn, setIsSigningIn] = useState(false);
     const signInAttemptRef = useRef(false);
 
+    // Check for redirect result when component mounts
+    useEffect(() => {
+        const checkRedirectResult = async () => {
+            try {
+                const result = await getRedirectResult(auth);
+                if (result) {
+                    console.log("Redirect sign-in successful");
+                    cookies.set("auth-token", result.user.refreshToken);
+                    setIsAuth(true);
+                }
+            } catch (error) {
+                console.error("Redirect result error:", error);
+            }
+        };
+
+        checkRedirectResult();
+    }, [setIsAuth]);
+
     const signInWithGoogle = async () => {
-        // Prevent multiple simultaneous sign-in attempts
         if (isSigningIn || signInAttemptRef.current) {
             console.log("Sign-in already in progress");
             return;
@@ -69,24 +86,24 @@ export const Auth = (props) => {
 
         try {
             console.log("Starting Google sign-in...");
-            const result = await signInWithPopup(auth, provider);
-            console.log("Sign-in successful");
             
-            cookies.set("auth-token", result.user.refreshToken);
-            setIsAuth(true);
+            // Use different methods based on environment
+            const isProduction = window.location.hostname !== 'localhost';
+            
+            if (isProduction) {
+                // Use redirect for production (more reliable on mobile/hosted sites)
+                console.log("Using redirect method for production...");
+                await signInWithRedirect(auth, provider);
+            } else {
+                // Use popup for local development
+                const result = await signInWithPopup(auth, provider);
+                console.log("Popup sign-in successful");
+                cookies.set("auth-token", result.user.refreshToken);
+                setIsAuth(true);
+            }
 
         } catch (err) {
             console.error("Sign-in error:", err);
-            if (err.code === "auth/cancelled-popup-request") {
-                console.warn("Popup cancelled");
-            } else if (err.code === "auth/popup-closed-by-user") {
-                console.warn("Popup closed by user");
-            } else if (err.code === "auth/popup-blocked") {
-                alert("Popup blocked! Please allow popups for this site.");
-            } else {
-                console.error("Login error", err);
-            }
-        } finally {
             setIsSigningIn(false);
             signInAttemptRef.current = false;
         }
