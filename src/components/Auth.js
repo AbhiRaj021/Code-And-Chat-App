@@ -42,7 +42,7 @@
 //     );
 // };
 
-import React, { useState, useRef, useEffect } from "react"; // Added useEffect import
+import React, { useState, useRef, useEffect } from "react";
 import { auth, provider } from "../firebase-config";
 import { signInWithPopup, signInWithRedirect, getRedirectResult } from "firebase/auth";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -55,36 +55,29 @@ const cookies = new Cookies();
 export const Auth = (props) => {
     const { setIsAuth } = props;
     const [isSigningIn, setIsSigningIn] = useState(false);
-    const [isCheckingRedirect, setIsCheckingRedirect] = useState(true);
     const signInAttemptRef = useRef(false);
 
-    // Check for redirect result when component mounts
+    // Check for redirect result when component mounts (only once)
     useEffect(() => {
         const checkRedirectResult = async () => {
             try {
-                console.log("Checking for redirect result...");
                 const result = await getRedirectResult(auth);
                 if (result) {
                     console.log("Redirect sign-in successful:", result.user);
                     cookies.set("auth-token", result.user.refreshToken);
                     setIsAuth(true);
-                    return;
                 }
-                console.log("No redirect result found");
             } catch (error) {
                 console.error("Redirect result error:", error);
-            } finally {
-                setIsCheckingRedirect(false);
             }
         };
 
         checkRedirectResult();
-    }, [setIsAuth]);
+    }, []); // Empty dependency array - only run once
 
     const signInWithGoogle = async () => {
-        // Prevent multiple simultaneous sign-in attempts
-        if (isSigningIn || signInAttemptRef.current || isCheckingRedirect) {
-            console.log("Sign-in already in progress or checking redirect");
+        if (isSigningIn || signInAttemptRef.current) {
+            console.log("Sign-in already in progress");
             return;
         }
 
@@ -94,16 +87,12 @@ export const Auth = (props) => {
         try {
             console.log("Starting Google sign-in...");
             
-            // Use different methods based on environment
             const isProduction = window.location.hostname !== 'localhost';
             
             if (isProduction) {
-                // Use redirect for production (more reliable)
                 console.log("Using redirect method for production...");
                 await signInWithRedirect(auth, provider);
-                // signInWithRedirect will cause page reload, so we don't continue here
             } else {
-                // Use popup for local development
                 try {
                     const result = await signInWithPopup(auth, provider);
                     console.log("Popup sign-in successful");
@@ -126,26 +115,11 @@ export const Auth = (props) => {
 
         } catch (err) {
             console.error("Sign-in error:", err);
-            if (err.code === "auth/popup-blocked") {
-                alert("Popup blocked! Please allow popups for this site or try again.");
-            } else {
-                console.error("Login error", err);
-            }
         } finally {
             setIsSigningIn(false);
             signInAttemptRef.current = false;
         }
     };
-
-    // Show loading while checking for redirect result
-    if (isCheckingRedirect) {
-        return (
-            <div className="auth">
-                <h2>Welcome to Code and Chat App, have fun.</h2>
-                <p>Checking authentication status...</p>
-            </div>
-        );
-    }
 
     return (
         <div className="auth">
@@ -153,8 +127,8 @@ export const Auth = (props) => {
             <p>In this application, you can collaborate with your friends on a code playground and chat with everyone in the room.</p>
             <button 
                 onClick={signInWithGoogle} 
-                disabled={isSigningIn || isCheckingRedirect}
-                style={{ opacity: (isSigningIn || isCheckingRedirect) ? 0.6 : 1 }}
+                disabled={isSigningIn}
+                style={{ opacity: isSigningIn ? 0.6 : 1 }}
             >
                 <FontAwesomeIcon icon={faGoogle} /> 
                 {isSigningIn ? "Signing In..." : "Sign In With Google"}
