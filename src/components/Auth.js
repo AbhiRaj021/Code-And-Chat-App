@@ -42,7 +42,7 @@
 //     );
 // };
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react"; // Added useEffect import
 import { auth, provider } from "../firebase-config";
 import { signInWithPopup, signInWithRedirect, getRedirectResult } from "firebase/auth";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -55,20 +55,26 @@ const cookies = new Cookies();
 export const Auth = (props) => {
     const { setIsAuth } = props;
     const [isSigningIn, setIsSigningIn] = useState(false);
+    const [isCheckingRedirect, setIsCheckingRedirect] = useState(true);
     const signInAttemptRef = useRef(false);
 
     // Check for redirect result when component mounts
     useEffect(() => {
         const checkRedirectResult = async () => {
             try {
+                console.log("Checking for redirect result...");
                 const result = await getRedirectResult(auth);
                 if (result) {
-                    console.log("Redirect sign-in successful");
+                    console.log("Redirect sign-in successful:", result.user);
                     cookies.set("auth-token", result.user.refreshToken);
                     setIsAuth(true);
+                    return;
                 }
+                console.log("No redirect result found");
             } catch (error) {
                 console.error("Redirect result error:", error);
+            } finally {
+                setIsCheckingRedirect(false);
             }
         };
 
@@ -77,8 +83,8 @@ export const Auth = (props) => {
 
     const signInWithGoogle = async () => {
         // Prevent multiple simultaneous sign-in attempts
-        if (isSigningIn || signInAttemptRef.current) {
-            console.log("Sign-in already in progress");
+        if (isSigningIn || signInAttemptRef.current || isCheckingRedirect) {
+            console.log("Sign-in already in progress or checking redirect");
             return;
         }
 
@@ -88,25 +94,33 @@ export const Auth = (props) => {
         try {
             console.log("Starting Google sign-in...");
             
-            // Try popup first
-            try {
-                const result = await signInWithPopup(auth, provider);
-                console.log("Popup sign-in successful");
-                cookies.set("auth-token", result.user.refreshToken);
-                setIsAuth(true);
-            } catch (popupError) {
-                console.log("Popup failed, trying redirect:", popupError.code);
-                
-                // If popup fails, use redirect (better for mobile/production)
-                if (popupError.code === "auth/popup-blocked" || 
-                    popupError.code === "auth/cancelled-popup-request" ||
-                    popupError.code === "auth/popup-closed-by-user") {
+            // Use different methods based on environment
+            const isProduction = window.location.hostname !== 'localhost';
+            
+            if (isProduction) {
+                // Use redirect for production (more reliable)
+                console.log("Using redirect method for production...");
+                await signInWithRedirect(auth, provider);
+                // signInWithRedirect will cause page reload, so we don't continue here
+            } else {
+                // Use popup for local development
+                try {
+                    const result = await signInWithPopup(auth, provider);
+                    console.log("Popup sign-in successful");
+                    cookies.set("auth-token", result.user.refreshToken);
+                    setIsAuth(true);
+                } catch (popupError) {
+                    console.log("Popup failed, trying redirect:", popupError.code);
                     
-                    console.log("Using redirect method...");
-                    await signInWithRedirect(auth, provider);
-                    // Note: signInWithRedirect will reload the page, so we don't handle success here
-                } else {
-                    throw popupError; // Re-throw other errors
+                    if (popupError.code === "auth/popup-blocked" || 
+                        popupError.code === "auth/cancelled-popup-request" ||
+                        popupError.code === "auth/popup-closed-by-user") {
+                        
+                        console.log("Using redirect method...");
+                        await signInWithRedirect(auth, provider);
+                    } else {
+                        throw popupError;
+                    }
                 }
             }
 
@@ -123,14 +137,24 @@ export const Auth = (props) => {
         }
     };
 
+    // Show loading while checking for redirect result
+    if (isCheckingRedirect) {
+        return (
+            <div className="auth">
+                <h2>Welcome to Code and Chat App, have fun.</h2>
+                <p>Checking authentication status...</p>
+            </div>
+        );
+    }
+
     return (
         <div className="auth">
             <h2>Welcome to Code and Chat App, have fun.</h2>
             <p>In this application, you can collaborate with your friends on a code playground and chat with everyone in the room.</p>
             <button 
                 onClick={signInWithGoogle} 
-                disabled={isSigningIn}
-                style={{ opacity: isSigningIn ? 0.6 : 1 }}
+                disabled={isSigningIn || isCheckingRedirect}
+                style={{ opacity: (isSigningIn || isCheckingRedirect) ? 0.6 : 1 }}
             >
                 <FontAwesomeIcon icon={faGoogle} /> 
                 {isSigningIn ? "Signing In..." : "Sign In With Google"}
