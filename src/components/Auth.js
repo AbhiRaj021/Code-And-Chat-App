@@ -15,8 +15,8 @@ export const Auth = (props) => {
 
     const signInWithGoogle = async () => {//asynchronous function do its task without stopping execution of other parts of a program
 
-        if (isSigningIn) return; // if already signing in, do nothing
-        setIsSigningIn = true;
+        if (isSigningIn) return;
+        setIsSigningIn(true);
         try {
             const result = await signInWithPopup(auth, provider);   //signInWithPopup:allows a user to sign in to your application using a pop-up window with a specified authentication provider //await: to pause the execution of the code in asynchronous fun until the asynchronous operation signInWithPopup(auth,provider); is complete
             cookies.set("auth-token", result.user.refreshToken);    //refereshToken: user can access the website without re-entering credentials everytime....unique for each user within a specific app//auth-token:name of cookie set by app...this name is same for all users of this app
