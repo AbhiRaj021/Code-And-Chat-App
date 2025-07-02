@@ -42,7 +42,7 @@
 //     );
 // };
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { auth, provider } from "../firebase-config";
 import { signInWithPopup, signInWithRedirect, getRedirectResult } from "firebase/auth";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -76,6 +76,7 @@ export const Auth = (props) => {
     }, [setIsAuth]);
 
     const signInWithGoogle = async () => {
+        // Prevent multiple simultaneous sign-in attempts
         if (isSigningIn || signInAttemptRef.current) {
             console.log("Sign-in already in progress");
             return;
@@ -87,23 +88,36 @@ export const Auth = (props) => {
         try {
             console.log("Starting Google sign-in...");
             
-            // Use different methods based on environment
-            const isProduction = window.location.hostname !== 'localhost';
-            
-            if (isProduction) {
-                // Use redirect for production (more reliable on mobile/hosted sites)
-                console.log("Using redirect method for production...");
-                await signInWithRedirect(auth, provider);
-            } else {
-                // Use popup for local development
+            // Try popup first
+            try {
                 const result = await signInWithPopup(auth, provider);
                 console.log("Popup sign-in successful");
                 cookies.set("auth-token", result.user.refreshToken);
                 setIsAuth(true);
+            } catch (popupError) {
+                console.log("Popup failed, trying redirect:", popupError.code);
+                
+                // If popup fails, use redirect (better for mobile/production)
+                if (popupError.code === "auth/popup-blocked" || 
+                    popupError.code === "auth/cancelled-popup-request" ||
+                    popupError.code === "auth/popup-closed-by-user") {
+                    
+                    console.log("Using redirect method...");
+                    await signInWithRedirect(auth, provider);
+                    // Note: signInWithRedirect will reload the page, so we don't handle success here
+                } else {
+                    throw popupError; // Re-throw other errors
+                }
             }
 
         } catch (err) {
             console.error("Sign-in error:", err);
+            if (err.code === "auth/popup-blocked") {
+                alert("Popup blocked! Please allow popups for this site or try again.");
+            } else {
+                console.error("Login error", err);
+            }
+        } finally {
             setIsSigningIn(false);
             signInAttemptRef.current = false;
         }
