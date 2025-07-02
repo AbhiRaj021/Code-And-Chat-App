@@ -18,11 +18,7 @@ export const Auth = (props) => {
             cookies.set("auth-token", result.user.refreshToken);    //refereshToken: user can access the website without re-entering credentials everytime....unique for each user within a specific app//auth-token:name of cookie set by app...this name is same for all users of this app
             setIsAuth(true);
         } catch (err) {
-            if (err.code === "auth/cancelled-popup-request") {
-                console.warn("Popup was cancelled.");
-            } else {
-                console.error(err);
-            }
+            console.error(err);
         } finally {
             isSigningIn = false;
         }
